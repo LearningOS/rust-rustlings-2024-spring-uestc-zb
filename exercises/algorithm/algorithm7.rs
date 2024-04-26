@@ -3,7 +3,6 @@
 	This question requires you to use a stack to achieve a bracket match
 */
 
-
 #[derive(Debug)]
 struct Stack<T> {
     size: usize,
@@ -37,11 +36,12 @@ impl<T> Stack<T> {
     }
 
     fn pop(&mut self) -> Option<T> {
-        if self.is_empty() {
-            return None;
+        if self.size > 0 {
+            self.size -= 1;
+            self.data.pop()
+        } else {
+            None
         }
-        self.size -= 1;
-        self.data.pop()
     }
 
     fn peek(&self) -> Option<&T> {
@@ -56,48 +56,53 @@ impl<T> Stack<T> {
         IntoIter(self)
     }
 
+    // fn iter(&self) -> Iter<T> {
+    //     Iter {
+    //         stack: self.data.iter().rev(),
+    //     }
+    // }
+
+    // fn iter_mut(&mut self) -> IterMut<T> {
+    //     IterMut {
+    //         stack: self.data.iter_mut().rev(),
+    //     }
+    // }
     fn iter(&self) -> Iter<T> {
         Iter {
-            stack: self.data.iter().rev(),
+            stack: self.data.iter(),
         }
     }
 
     fn iter_mut(&mut self) -> IterMut<T> {
         IterMut {
-            stack: self.data.iter_mut().rev(),
+            stack: self.data.iter_mut(),
         }
     }
 }
 
 struct IntoIter<T>(Stack<T>);
-
 impl<T> Iterator for IntoIter<T> {
     type Item = T;
-
     fn next(&mut self) -> Option<Self::Item> {
         self.0.pop()
     }
 }
 
-struct Iter<'a, T> {
+struct Iter<'a, T: 'a> {
     stack: std::slice::Iter<'a, T>,
 }
-
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
-
     fn next(&mut self) -> Option<Self::Item> {
         self.stack.next()
     }
 }
 
-struct IterMut<'a, T> {
+struct IterMut<'a, T: 'a> {
     stack: std::slice::IterMut<'a, T>,
 }
-
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
-
     fn next(&mut self) -> Option<Self::Item> {
         self.stack.next()
     }
@@ -106,9 +111,9 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 fn bracket_match(bracket: &str) -> bool {
     let mut stack = Stack::new();
 
-    for ch in bracket.chars() {
-        match ch {
-            '(' | '[' | '{' => stack.push(ch),
+    for c in bracket.chars() {
+        match c {
+            '(' | '[' | '{' => stack.push(c),
             ')' => {
                 if stack.pop() != Some('(') {
                     return false;
@@ -171,6 +176,7 @@ mod tests {
         assert_eq!(bracket_match(s), true);
     }
 }
+
 
 // #[derive(Debug)]
 // struct Stack<T> {
